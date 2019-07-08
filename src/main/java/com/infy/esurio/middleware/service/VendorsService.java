@@ -26,32 +26,33 @@ import java.util.Arrays;
  */
 public class VendorsService {
 
-    public final String vendorURL = "http://192.168.1.206:8080/api/vendors";
+    public final String vendorURL = "http://192.168.1.206:8080/apis/vendors/";
 
-    public List<VendorsDTO> getAllVendors(String authorization) throws IOException {
-        HttpResponse response = doGet(vendorURL, authorization);
+    public List<VendorsDTO> getAllVendors() throws IOException {
+        HttpResponse response = RequestHelper.doGet(vendorURL);
         if (response.getStatusCode() == 200) {
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = response.parseAsString();
+            System.out.println(jsonString);
             VendorsDTO[] vendorsDTOs = mapper.readValue(jsonString, VendorsDTO[].class);
             for (VendorsDTO vendorsDTO : vendorsDTOs) {
                 System.err.println(vendorsDTO.toString());
             }
 
-            System.out.println(vendorsDTOs[0].toString());
+//            System.out.println(vendorsDTOs[0].toString());
             
             return  Arrays.asList(vendorsDTOs);
         }
         return new ArrayList<>();
     }
     public static void main(String[] args) throws IOException {
-        Authentication connection = new Authentication();
-        connection.authenticate();
+//        Authentication connection = new Authentication();
+//        connection.authenticate();
 
         VendorsService vendorsService = new VendorsService();
         try {
-            System.out.println(" Token " + connection.getToken());
-            vendorsService.getAllVendors("Bearer " + connection.getToken());
+//            System.out.println(" Token " + connection.getToken());
+            vendorsService.getAllVendors();
         } catch (IOException ex) {
             Logger.getLogger(VendorsService.class.getName()).log(Level.SEVERE, null, ex);
         }

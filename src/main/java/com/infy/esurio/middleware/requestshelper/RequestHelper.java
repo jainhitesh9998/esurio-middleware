@@ -22,6 +22,7 @@ import java.util.logging.Logger;
  * @author developer
  */
 public class RequestHelper {
+    private static String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1dGgiOiJST0xFX0FETUlOLFJPTEVfVVNFUiIsImV4cCI6MTU2MjY4MjUyOH0.3d78yeeK9NDS5qqvT5nJ8st_YsZaBcSd4MXm7SErIGKnHV6hA8ykrYuhmxbvyne1xIcQoaekTIuK593za5Sung";
     private static final HttpRequestFactory requestFactory = new NetHttpTransport().createRequestFactory();
     
     /**
@@ -33,11 +34,22 @@ public class RequestHelper {
      * @return
      * @throws IOException
      */
-    public static HttpResponse doPost(String URL, String authorization, String data, String type) throws IOException{
+    
+    public static void RefreshToken() throws IOException{
+        
+           Authentication authentication = new Authentication();
+           RequestHelper.token = authentication.getToken();
+
+    } 
+
+    public static HttpResponse doPost(String URL, String data, String type) throws IOException {
+        if( RequestHelper.token == null || RequestHelper.token.isEmpty()){
+            RequestHelper.RefreshToken();
+        }
         ByteArrayContent fromString = ByteArrayContent.fromString("application/json", data);
         HttpRequest postRequest = RequestHelper.requestFactory.buildPostRequest(new GenericUrl(URL), fromString);
         HttpHeaders authHeader = new HttpHeaders();
-        postRequest.setHeaders(new HttpHeaders().setAuthorization(authorization));
+        postRequest.setHeaders(new HttpHeaders().setAuthorization("Bearer " + RequestHelper.token));
         return postRequest.execute();
     } 
     
@@ -48,10 +60,15 @@ public class RequestHelper {
      * @return
      * @throws java.io.IOException
      */
-    public static HttpResponse doGet(String URL,String authorization) throws IOException{
+    public static HttpResponse doGet(String URL) throws IOException{
+        System.out.println(RequestHelper.token);
+        if( RequestHelper.token == null || RequestHelper.token.isEmpty()){
+            RequestHelper.RefreshToken();
+        }
         HttpRequest getRequest = RequestHelper.requestFactory.buildGetRequest(new GenericUrl(URL));
-        getRequest.setHeaders(new HttpHeaders().setAuthorization(authorization));
-        return getRequest.execute();
+        getRequest.setHeaders(new HttpHeaders().setAuthorization("Bearer " + RequestHelper.token));
+        HttpResponse response = getRequest.execute();
+        return response;
     }
     
     
